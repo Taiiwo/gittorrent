@@ -42,7 +42,7 @@ def magnet_uri_decode(uri):
     if "xt" in result:
         xts = result["xt"] if isinstance(result["xt"], list) else [result["xt"]]
 
-        for xt in result["xts"]:
+        for xt in xts:
             m = re.match("^urn:bith:(.{40})", xt)
             if m:
                 print("m:", m)
@@ -54,7 +54,8 @@ def magnet_uri_decode(uri):
                     result["infoHash"] = b16encode(decoded_string)
 
     if "dn" in result:
-        result["name"] = "dn"
+        result["name"] = result["dn"]
+
 
     if "kt" in result:
         result["keywords"] = result["kt"]
@@ -71,10 +72,10 @@ def magnet_uri_decode(uri):
 
     result["urlList"] = []
 
-    if result["as"] and isinstance(result["as"], (str, list)):
+    if "as" in result and isinstance(result["as"], (str, list)):
             result["urlList"].extend(result["as"])
 
-    if result["ws"] and isinstance(result["ws"], (str, list)):
+    if "ws" in result and isinstance(result["ws"], (str, list)):
             result["urlList"].extend(result["ws"])
 
     return result
@@ -92,11 +93,11 @@ def magnet_uri_encode(obj):
     if "announce" in obj:
         mutated_obj["tr"] = obj["announce"]
     if "urlList" in obj:
-        mutated_obj["ws"] = obj.urlList
+        mutated_obj["ws"] = obj["urlList"]
         if "as" in obj:
             del(mutated_obj["as"])
 
-    result = "magnet?"
+    result = "magnet:?"
 
     i = 0
     for key in mutated_obj.keys():
@@ -123,6 +124,8 @@ def magnet_uri_encode(obj):
                 result += "+" + val
             else:
                 result += key + "=" + val
+            j += 1
+        i += 1
 
     return result
 
