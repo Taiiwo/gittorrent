@@ -43,14 +43,13 @@ def magnet_uri_decode(uri):
         xts = result["xt"] if isinstance(result["xt"], list) else [result["xt"]]
 
         for xt in xts:
-            m = re.match("^urn:bith:(.{40})", xt)
+            m = re.match("^urn:btih:(.{40})", xt)
             if m:
-                print("m:", m)
-                result["infoHash"] = m[1]  # might need conversion
+                result["infoHash"] = m.groups(0)  # might need conversion
             else:
-                m = re.match("^urn:bith:(.{32})", xt)
+                m = re.match("^urn:btih:(.{32})", xt)
                 if m:
-                    decoded_string = b32decode(m[1])
+                    decoded_string = b32decode(m.groups(0))
                     result["infoHash"] = b16encode(decoded_string)
 
     if "dn" in result:
