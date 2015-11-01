@@ -21,7 +21,7 @@ def magnet_uri_decode(uri):
         val = keyval[1]
 
         if key == "dn":
-            val = re.sub("\+", " ", unquote(val))
+            val = unquote(val).replace("+", " ")
 
         if key in ["tr", "xs", "as", "ws"]:
             val = unquote(val)
@@ -76,6 +76,53 @@ def magnet_uri_decode(uri):
 
     if result["ws"] and isinstance(result["ws"], (str, list)):
             result["urlList"].extend(result["ws"])
+
+    return result
+
+
+def magnet_uri_encode(obj):
+    mutated_obj = obj
+
+    if "infoHash" in obj:
+        mutated_obj["xt"] = "urn:btih:" + obj["infoHash"]
+    if "name" in obj:
+        mutated_obj["dn"] = obj["name"]
+    if "keywords" in obj:
+        mutated_obj["kt"] = obj["keywords"]
+    if "announce" in obj:
+        mutated_obj["tr"] = obj["announce"]
+    if "urlList" in obj:
+        mutated_obj["ws"] = obj.urlList
+        if "as" in obj:
+            del(mutated_obj["as"])
+
+    result = "magnet?"
+
+    i = 0
+    for key in mutated_obj.keys():
+        if len(key) != 2:
+            continue
+
+        values = mutated_obj[key] if isinstance(mutated_obj[key], (list, tuple)) else [mutated_obj[key]]
+
+        j = 0
+        for val in values:
+            if (i > 0 or j > 0) and (key != "kt" or j == 0):
+                result += "&"
+
+            if key == "dn":
+                val = quote(val).replace("%20", "+")
+
+            if key in ["tr", "xs", "as", "ws"]:
+                val = quote(val)
+
+            if key == "kt":
+                val = quote(val)
+
+            if key == "kt" and j > 0:
+                result += "+" + val
+            else:
+                result += key + "=" + val
 
     return result
 
