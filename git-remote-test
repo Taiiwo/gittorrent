@@ -1,0 +1,20 @@
+#!/usr/bin/env python2
+
+import sys
+import re
+import util
+
+def log(s):
+    open('log', 'a').write(s + "\n")
+
+log(str(sys.argv))
+
+remoteName = sys.argv[1]
+url = sys.argv[2]
+matches = re.match(r"gittorrent://([a-f0-9]{40})/(.*)", url)
+refs = {}
+if matches:
+    key = matches.group(1)
+    repoName = matches.group(2)
+    if re.search(r"^gittorrent://", remoteName) !== None):
+        remoteName = key
