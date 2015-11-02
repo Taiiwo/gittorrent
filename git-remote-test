@@ -3,12 +3,12 @@
 import sys
 import re
 import util
+from twisted.internet import reactor
+from twisted.python import log
+from kademlia.network import Server
 
-def log(s):
-    open('log', 'a').write(s + "\n")
-
-log(str(sys.argv))
-
+host = "dht.transmissionbt.com"
+port = 6881
 remoteName = sys.argv[1]
 url = sys.argv[2]
 matches = re.match(r"gittorrent://([a-f0-9]{40})/(.*)", url)
@@ -18,3 +18,19 @@ if matches:
     repoName = matches.group(2)
     if re.search(r"^gittorrent://", remoteName) !== None):
         remoteName = key
+    server = Server()
+    server.listen(port)
+    def lookupCallback(result):
+        repos = json.dumps(result)
+        util.talkToGit(repos['repositories'][reponame])
+        reactor.stop()
+    def bootstrapCallback(found, server, key):
+        if len(found) == 0:
+            print "Could not connect to the bootstrap server."
+            reactor.stop()
+        server.get(key).addCallback(lookupCallback)
+    server.bootstrap([host, port]).addCallback(bootstrapCallback)
+    reactor.run()
+else:
+    url = re.sub(r"^gittorrent:", "git:")
+    ls
