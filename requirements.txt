@@ -1,1 +1,4 @@
 kademlia
+colorama
+kad.py
+GitPython
