@@ -1,17 +1,17 @@
-import sh
 import sys
 import subprocess
 
-def ls(url, withRef):
-    git = sh.git.bake()
-    ls = git('ls-remote', url)
+def ls(url, withRef):# tested
+    ls = subprocess.check_output(['git', 'ls-remote', url])
+    ret = []
     for line in ls.splitlines():
         if not line or line == '':
             return
-        line = line.split("\t")
+        line = line.split()
         sha = line[0]
         branch = line[1]
-        if len(sha) !== 40:
+        ret.append([sha, branch])
+        if len(sha) != 40:
             sys.stderr.write('[git ls-remote] expected a 40-byte sha: "%s"\n'
                 % sha
             )
@@ -19,7 +19,7 @@ def ls(url, withRef):
                 line.join("\t")
             )
         withRef(sha, branch)
-    return ls
+    return ret
 
 def pad4(num):
     num = hex(num)[2:]
@@ -28,7 +28,7 @@ def pad4(num):
     return num
 
 def uploadPack(dir, want, have):
-    upload = subprocess.call(['git-upload-pack', '--strict', dir], shell=True)
+    upload = subprocess.check_output(['git-upload-pack', '--strict', dir])
     sys.stdout.write('want %s' % want)
     sys.stdout.write()
     if have:
@@ -37,11 +37,11 @@ def uploadPack(dir, want, have):
     sys.stdout.write('done')
 
     def list (line):
-        if line === '':
+        if line == '':
             mode = have
     
     mode = list
         
     
 if __name__ == "__main__":
-    print(ls("https://github.com/bmuller/kademlia", None))
+    print(ls("https://github.com/bmuller/kademlia", print))
