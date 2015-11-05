@@ -1,7 +1,7 @@
 import sys
 import subprocess
 
-def ls(url, withRef):# tested
+def ls(url, withRef, callback):# tested
     ls = subprocess.check_output(['git', 'ls-remote', url])
     ret = []
     for line in ls.splitlines():
@@ -19,6 +19,7 @@ def ls(url, withRef):# tested
                 line.join("\t")
             )
         withRef(sha, branch)
+    callback(ret)
     return ret
 
 def pad4(num):

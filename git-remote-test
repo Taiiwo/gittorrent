@@ -3,6 +3,7 @@
 import sys
 import re
 import util
+import git
 from twisted.internet import reactor
 from twisted.python import log
 from kademlia.network import Server
@@ -18,19 +19,30 @@ if matches:
     repoName = matches.group(2)
     if re.search(r"^gittorrent://", remoteName) !== None):
         remoteName = key
-    server = Server()
-    server.listen(port)
     def lookupCallback(result):
         repos = json.dumps(result)
+        sys.stderr.write(
+            "\nMutable key %s returned:\n%s" % (key, repos)
+        )
         util.talkToGit(repos['repositories'][reponame])
         reactor.stop()
-    def bootstrapCallback(found, server, key):
+    def lookupValue(found, server, key):
         if len(found) == 0:
             print "Could not connect to the bootstrap server."
             reactor.stop()
         server.get(key).addCallback(lookupCallback)
-    server.bootstrap([host, port]).addCallback(bootstrapCallback)
+    server = Server()
+    server.listen(port)
+    server.bootstrap([host, port]).addCallback(lookupValue)
     reactor.run()
 else:
     url = re.sub(r"^gittorrent:", "git:")
-    ls
+    def callback(sha, branch):
+        refs[branch] = sha
+    def callback2(refs):
+        talkToGit(refs)
+    ls = git.ls(url, callback, callback2)
+
+fetching = {}
+todo = 0
+
